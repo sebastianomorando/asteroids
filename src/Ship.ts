@@ -1,6 +1,7 @@
 import { drawPolygon, polysIntersect } from './utils';
 import Controls from './Controls';
 import Asteroid from './Asteroid';
+import Sensor from './Sensor';
 
 class Ship {
 
@@ -21,7 +22,11 @@ class Ship {
 
     constrols: Controls = new Controls();
 
+    sensor = new Sensor(this);
+
     hitten:boolean=false;
+
+    center: { x: number; y: number } = { x: 0, y: 0 };
 
     update(asteroids:Array<Asteroid> = []) {
             
@@ -63,6 +68,11 @@ class Ship {
                     y: x * Math.sin(this.angle) + y * Math.cos(this.angle) + centroid.y + this.y
                 }
             });
+
+            this.center = {
+                x: centroid.x + this.x,
+                y: centroid.y + this.y
+            }
             
 
             this.hitten=false;
@@ -71,6 +81,8 @@ class Ship {
                     this.hitten=true;
                 }
             });
+
+            this.sensor.update(asteroids);
             
     }
 
@@ -78,6 +90,8 @@ class Ship {
         ctx.strokeStyle = this.hitten ? 'red' : 'black';
         drawPolygon(ctx, this.polygon);
         ctx.strokeStyle = 'black';
+
+        this.sensor.draw(ctx);
     }
 }
 
