@@ -5,7 +5,7 @@ class Asteroid {
     public x: number = Math.random() * window.innerWidth;
     public y: number =  Math.random() * window.innerHeight;
     angle: number = Math.random() * 2 * Math.PI;
-    speed: number = 0;
+    speed: number = Math.random() * 2;
 
     vertices: Array<{ x: number; y: number }> = randomPolygon(8, 20);
     polygon: Array<{ x: number; y: number }> = [];

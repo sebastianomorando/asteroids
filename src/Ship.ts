@@ -2,6 +2,7 @@ import { drawPolygon, polysIntersect } from './utils';
 import Controls from './Controls';
 import Asteroid from './Asteroid';
 import Sensor from './Sensor';
+import NeuralNetwork from './Network';
 
 class Ship {
 
@@ -20,7 +21,7 @@ class Ship {
     ];
     polygon: Array<{ x: number; y: number }> = [];
 
-    constrols: Controls = new Controls();
+    controls: Controls = new Controls();
 
     sensor = new Sensor(this);
 
@@ -28,12 +29,14 @@ class Ship {
 
     center: { x: number; y: number } = { x: 0, y: 0 };
 
+    brain: NeuralNetwork = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
+
     update(asteroids:Array<Asteroid> = []) {
             
             // this.angle+=0.01;
 
-            if (this.constrols.forward) this.speed += this.acceleration;
-            if (this.constrols.backward) this.speed -= this.acceleration;
+            if (this.controls.forward) this.speed += this.acceleration;
+            if (this.controls.backward) this.speed -= this.acceleration;
             
             if (this.speed > this.maxSpeed) this.speed = this.maxSpeed;
             if (this.speed < -this.maxSpeed) this.speed = -this.maxSpeed;
@@ -43,8 +46,8 @@ class Ship {
 
             if (Math.abs(this.speed) < this.friction) this.speed = 0;
 
-            if (this.constrols.left) this.angle -= 0.05;
-            if (this.constrols.right) this.angle += 0.05;
+            if (this.controls.left) this.angle -= 0.05;
+            if (this.controls.right) this.angle += 0.05;
 
             this.x+=Math.cos(this.angle)*this.speed;
             this.y+=Math.sin(this.angle)*this.speed;
@@ -83,6 +86,15 @@ class Ship {
             });
 
             this.sensor.update(asteroids);
+            const offsets=this.sensor.readings.map(
+                s=>s==null?0:1-s.offset
+            );
+            const outputs=NeuralNetwork.feedForward(offsets,this.brain);
+
+            this.controls.forward=outputs[0];
+            this.controls.left=outputs[1];
+            this.controls.right=outputs[2];
+            this.controls.backward=outputs[3];
             
     }
 
@@ -91,7 +103,7 @@ class Ship {
         drawPolygon(ctx, this.polygon);
         ctx.strokeStyle = 'black';
 
-        this.sensor.draw(ctx);
+        // this.sensor.draw(ctx);
     }
 }
 
