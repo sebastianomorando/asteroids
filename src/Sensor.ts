@@ -20,7 +20,6 @@ class Sensor {
 
     constructor(ship: Ship) {
         this.ship = ship;
-        
     }
 
     update(asteroids: Array<Asteroid>){
@@ -116,6 +115,10 @@ class Sensor {
             );
             ctx.stroke();
         }
+    }
+
+    destroy(){
+        this.ship=null;
     }
 }
 

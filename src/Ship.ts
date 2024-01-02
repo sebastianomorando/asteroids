@@ -5,9 +5,11 @@ import Sensor from './Sensor';
 import NeuralNetwork from './Network';
 
 class Ship {
-
-    public x: number =  window.innerWidth / 2;
-    public y: number = window.innerHeight / 2;
+    
+    // public x: number =  window.innerWidth / 2;
+    // public y: number = window.innerHeight / 2;
+    public x: number = Math.random() * window.innerWidth;
+    public y: number =  Math.random() * window.innerHeight;
     angle: number = 3 * Math.PI / 2;
     speed: number = 0;
     acceleration: number = 0.1;
@@ -29,7 +31,7 @@ class Ship {
 
     center: { x: number; y: number } = { x: 0, y: 0 };
 
-    brain: NeuralNetwork = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
+    brain: NeuralNetwork = new NeuralNetwork([this.sensor.rayCount, 12, 4]);
 
     update(asteroids:Array<Asteroid> = []) {
             
@@ -51,6 +53,11 @@ class Ship {
 
             this.x+=Math.cos(this.angle)*this.speed;
             this.y+=Math.sin(this.angle)*this.speed;
+
+            if (this.y < 0) this.y = window.innerHeight;
+            if (this.y > window.innerHeight) this.y = 0;
+            if (this.x < 0) this.x = window.innerWidth;
+            if (this.x > window.innerWidth) this.x = 0;
     
             // find the centroid
             const centroid = this.vertices.reduce((acc, vertex) => {
@@ -99,11 +106,20 @@ class Ship {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = this.hitten ? 'red' : 'black';
+        ctx.strokeStyle = this.hitten ? 'red' : 'green';
         drawPolygon(ctx, this.polygon);
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = 'green';
 
         // this.sensor.draw(ctx);
+    }
+
+    destroy() {
+        this.brain=null;
+        this.sensor.destroy();
+        this.sensor=null;
+        this.controls.destroy();
+        this.controls=null;
+
     }
 }
 

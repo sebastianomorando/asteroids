@@ -43,6 +43,11 @@ class Controls {
                 break;
         }
     }
+
+    destroy() {
+        document.removeEventListener('keydown', this.onKeyDown.bind(this));
+        document.removeEventListener('keyup', this.onKeyUp.bind(this));
+    }
 }
 
 export default Controls;

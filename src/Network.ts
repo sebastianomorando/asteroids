@@ -1,3 +1,4 @@
+import {lerp} from "./utils";
 class Level {
 
     constructor(inputCount,outputCount){

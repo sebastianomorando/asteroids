@@ -10,6 +10,8 @@ class Asteroid {
     vertices: Array<{ x: number; y: number }> = randomPolygon(8, 20);
     polygon: Array<{ x: number; y: number }> = [];
 
+    hitten:boolean=false;
+
     public update() {
 
         this.x-=Math.sin(this.angle)*this.speed;
@@ -34,11 +36,17 @@ class Asteroid {
                 y: x * Math.sin(this.angle) + y * Math.cos(this.angle) + centroid.y + this.y
             }
         });
+
+        if (this.y < 0) this.y = window.innerHeight;
+        if (this.y > window.innerHeight) this.y = 0;
+        if (this.x < 0) this.x = window.innerWidth;
+        if (this.x > window.innerWidth) this.x = 0;
     }
 
     public draw(ctx: CanvasRenderingContext2D) {
         drawPolygon(ctx, this.polygon);
     }
+
 }
 
 export default Asteroid;
