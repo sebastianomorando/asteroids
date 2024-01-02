@@ -10,7 +10,7 @@ interface Ray {
 class Sensor {
 
     rayCount: number = 12;
-    rayLength: number = 100;
+    rayLength: number = 200;
     raySpread: number = Math.PI * 2 - Math.PI / this.rayCount * 2;
 
     rays: Array<Ray> = [];

@@ -4,6 +4,8 @@ import Asteroid from './Asteroid';
 import Sensor from './Sensor';
 import NeuralNetwork from './Network';
 
+const TURN_BEFORE_DEATH = 500;
+
 class Ship {
     
     // public x: number =  window.innerWidth / 2;
@@ -31,7 +33,9 @@ class Ship {
 
     center: { x: number; y: number } = { x: 0, y: 0 };
 
-    brain: NeuralNetwork = new NeuralNetwork([this.sensor.rayCount, 12, 4]);
+    brain: NeuralNetwork = new NeuralNetwork([this.sensor.rayCount, 8, 6, 4]);
+
+    turnsBeforeDeath: number = TURN_BEFORE_DEATH;
 
     update(asteroids:Array<Asteroid> = []) {
             
@@ -47,6 +51,12 @@ class Ship {
             if (this.speed < 0) this.speed += this.friction;
 
             if (Math.abs(this.speed) < this.friction) this.speed = 0;
+
+            if (this.speed == 0) {
+                this.turnsBeforeDeath--;
+            } else {
+                this.turnsBeforeDeath = TURN_BEFORE_DEATH;
+            }
 
             if (this.controls.left) this.angle -= 0.05;
             if (this.controls.right) this.angle += 0.05;
