@@ -1,16 +1,20 @@
-import { randomPolygon, drawPolygon, polysIntersect } from './utils';
-import Bullet from './Bullet';
-class Asteroid {
+import { regularPolygon, drawPolygon } from "./utils";
+
+class Bullet {
 
     public x: number = Math.random() * window.innerWidth;
     public y: number =  Math.random() * window.innerHeight;
     angle: number = Math.random() * 2 * Math.PI;
-    speed: number = Math.random() * 2;
+    speed: number = 5;
 
-    vertices: Array<{ x: number; y: number }> = randomPolygon(8, 20);
+    vertices: Array<{ x: number; y: number }> = regularPolygon(8, 5);
     polygon: Array<{ x: number; y: number }> = [];
 
-    hitten:boolean=false;
+    constructor(x:number,y:number,angle:number){
+        this.x=x;
+        this.y=y;
+        this.angle=angle;
+    }
 
     public update(bullets:Array<Bullet>) {
 
@@ -37,16 +41,10 @@ class Asteroid {
             }
         });
 
-        if (this.y < 0) this.y = window.innerHeight;
-        if (this.y > window.innerHeight) this.y = 0;
-        if (this.x < 0) this.x = window.innerWidth;
-        if (this.x > window.innerWidth) this.x = 0;
-
-        bullets.forEach((bullet)=>{
-            if(polysIntersect(this.polygon,bullet.polygon)){
-                this.hitten=true;
-            }
-        });
+        if (this.y < 0) bullets.splice(bullets.indexOf(this),1);
+        if (this.y > window.innerHeight) bullets.splice(bullets.indexOf(this),1);
+        if (this.x < 0) bullets.splice(bullets.indexOf(this),1);
+        if (this.x > window.innerWidth) bullets.splice(bullets.indexOf(this),1);
     }
 
     public draw(ctx: CanvasRenderingContext2D) {
@@ -54,12 +52,6 @@ class Asteroid {
         drawPolygon(ctx, this.polygon);
         ctx.strokeStyle = 'green';
     }
-
-    public destroy(){
-        // this.vertices=[];
-        // this.polygon=[];
-    }
-
 }
 
-export default Asteroid;
+export default Bullet;

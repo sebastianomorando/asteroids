@@ -2,6 +2,8 @@ import './style.css';
 import Asteroid from './Asteroid';
 import Ship from './Ship';
 import NeuralNetwork from './Network';
+import { pointInPolygon } from './utils';
+import Bullet from './Bullet';
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
 
 canvas.width = window.innerWidth;
@@ -9,7 +11,8 @@ canvas.height = window.innerHeight;
 
 export const ctx = canvas.getContext('2d')!;
 
-const NUMBER_OF_ASTEROIDS = 80;
+const MODE: 'AI' | 'PLAYER' = "AI";
+const NUMBER_OF_ASTEROIDS = 40;
 const NUMBER_OF_SHIPS = 100;
 
 const asteroids = Array();
@@ -29,19 +32,35 @@ if (localStorage.getItem('brain')) {
     }
 }
 
+const player = new Ship();
+player.player = true;
+
+const bullets: Array<Bullet> = [];
+
 const animate = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     asteroids.forEach((entity: any) => {
-        entity.update();
+        entity.update(bullets);
         entity.draw(ctx);
+        if (entity.hitten) {
+            entity.destroy();
+            asteroids.splice(asteroids.indexOf(entity), 1);
+        }
     });
     ships.forEach((entity: any) => {
-        entity.update(asteroids);
+        entity.update(asteroids, bullets);
         entity.draw(ctx);
         if (entity.hitten || entity.turnsBeforeDeath <= 0) {
             entity.destroy();
             ships.splice(ships.indexOf(entity), 1);
         }
+    });
+    player.update(asteroids, bullets);
+    player.draw(ctx);
+
+    bullets.forEach((bullet) => {
+        bullet.update(bullets);
+        bullet.draw(ctx);
     });
 
 
@@ -61,14 +80,35 @@ const animate = () => {
         }
     }
 
+    if (asteroids.length < NUMBER_OF_ASTEROIDS) {
+        asteroids.push(new Asteroid());
+    }
 
     requestAnimationFrame(animate);
 }
 animate();
 
+let shipUnderMouse: Ship | null = null;
 const saveButton = document.getElementById('save') as HTMLButtonElement;
 
 saveButton.addEventListener('click', () => {
-    const data = JSON.stringify(bestBrain);
+    let data = JSON.stringify(bestBrain);
+    if (shipUnderMouse) {
+        data = JSON.stringify(shipUnderMouse.brain);
+    }
     localStorage.setItem('brain', data);
+});
+
+
+document.addEventListener('mousedown', (e) => {
+    const x = e.clientX;
+    const y = e.clientY;
+    // asteroids.push(new Asteroid(x, y));
+    if (shipUnderMouse) shipUnderMouse.selected = false;
+    shipUnderMouse = ships.find((ship) => {
+        return pointInPolygon({ x, y }, ship.polygon);
+    }) || null;
+    if (shipUnderMouse) {
+        shipUnderMouse.selected = true;
+    }
 });

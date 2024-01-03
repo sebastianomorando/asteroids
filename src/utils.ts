@@ -9,6 +9,16 @@ export const randomPolygon = (sides: number, radius: number) => {
     return points;
 };
 
+export const regularPolygon = (sides: number, radius: number) => {
+    const points = Array<{ x: number; y: number; }>();
+    for (let i = 0; i < sides; i++) {
+        const x = radius * Math.cos((2 * Math.PI * i) / sides);
+        const y = radius * Math.sin((2 * Math.PI * i) / sides);
+        points.push({ x, y });
+    }
+    return points;
+}
+
 export const drawPolygon = (ctx: CanvasRenderingContext2D, points: Array<{ x: number; y: number; }>) => {
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
@@ -62,4 +72,18 @@ export function polysIntersect(poly1:Array<Point>, poly2:Array<Point>){
         }
     }
     return false;
+}
+
+export const pointInPolygon = (point: Point, polygon: Array<Point>) => {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].x, yi = polygon[i].y;
+        const xj = polygon[j].x, yj = polygon[j].y;
+
+        const intersect = ((yi > point.y) != (yj > point.y))
+            && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
 }

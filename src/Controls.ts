@@ -4,6 +4,7 @@ class Controls {
     backward: boolean = false;
     left: boolean = false;
     right: boolean = false;
+    shoot: boolean = false;
 
     constructor() {
         document.addEventListener('keydown', this.onKeyDown.bind(this));
@@ -24,6 +25,9 @@ class Controls {
             case 'd':
                 this.right = true;
                 break;
+            case ' ':
+                this.shoot = true;
+                break;
         }
     }
 
@@ -40,6 +44,9 @@ class Controls {
                 break;
             case 'd':
                 this.right = false;
+                break;
+            case ' ':
+                this.shoot = false;
                 break;
         }
     }

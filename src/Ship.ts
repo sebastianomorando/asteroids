@@ -3,8 +3,10 @@ import Controls from './Controls';
 import Asteroid from './Asteroid';
 import Sensor from './Sensor';
 import NeuralNetwork from './Network';
+import Bullet from './Bullet';
 
-const TURN_BEFORE_DEATH = 500;
+const TURN_BEFORE_DEATH = 1000;
+const BULLET_COOLDOWN = 40;
 
 class Ship {
     
@@ -33,11 +35,17 @@ class Ship {
 
     center: { x: number; y: number } = { x: 0, y: 0 };
 
-    brain: NeuralNetwork = new NeuralNetwork([this.sensor.rayCount, 8, 6, 4]);
+    brain: NeuralNetwork = new NeuralNetwork([this.sensor.rayCount, 12, 5]);
 
     turnsBeforeDeath: number = TURN_BEFORE_DEATH;
 
-    update(asteroids:Array<Asteroid> = []) {
+    selected: boolean = false;
+
+    player: boolean = false;
+
+    bulletCooldown: number = 0;
+
+    update(asteroids:Array<Asteroid> = [], bullets: Array<any> = []) {
             
             // this.angle+=0.01;
 
@@ -102,25 +110,41 @@ class Ship {
                 }
             });
 
+            
             this.sensor.update(asteroids);
             const offsets=this.sensor.readings.map(
                 s=>s==null?0:1-s.offset
             );
-            const outputs=NeuralNetwork.feedForward(offsets,this.brain);
+            if (!this.player) {
+                const outputs=NeuralNetwork.feedForward(offsets,this.brain);
 
-            this.controls.forward=outputs[0];
-            this.controls.left=outputs[1];
-            this.controls.right=outputs[2];
-            this.controls.backward=outputs[3];
-            
+                this.controls.forward=outputs[0];
+                this.controls.left=outputs[1];
+                this.controls.right=outputs[2];
+                this.controls.backward=outputs[3];
+                this.controls.shoot=outputs[4];
+            }
+            if (this.controls.shoot) {
+                if (this.bulletCooldown === 0) {
+                    this.bulletCooldown = BULLET_COOLDOWN;
+                    bullets.push(new Bullet(this.center.x, this.center.y, this.angle));
+                } else {
+                    this.bulletCooldown--;
+                }
+            }
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = this.hitten ? 'red' : 'green';
+        let color = 'green';
+        if (this.selected) color = 'yellow';
+        if (this.player) color = 'cyan';
+        ctx.strokeStyle = this.hitten ? 'red' : color;
         drawPolygon(ctx, this.polygon);
         ctx.strokeStyle = 'green';
 
-        // this.sensor.draw(ctx);
+        if (this.selected) {
+            this.sensor.draw(ctx);
+        }
     }
 
     destroy() {
